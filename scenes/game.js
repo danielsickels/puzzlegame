@@ -1,6 +1,17 @@
-import Player from "/objects/player.js";
+class Player extends Phaser.GameObjects.Sprite {
+  constructor(scene, x, y, sprite) {
+    super(scene, x, y, sprite);
+    this.speed = 5;
+    scene.add.existing(this);
+  }
 
-this.screenSize = this.sys.scale.gameSize;
+  move(cursors) {
+    if (cursors && cursors.up.isDown) this.y -= this.speed;
+    if (cursors && cursors.left.isDown) this.x -= this.speed;
+    if (cursors && cursors.down.isDown) this.y += this.speed;
+    if (cursors && cursors.right.isDown) this.x += this.speed;
+  }
+}
 
 class Game extends Phaser.Scene {
   constructor() {
@@ -8,47 +19,27 @@ class Game extends Phaser.Scene {
   }
 
   preload() {
-    this.preload.image("playerfront", "assets/playerfront.png");
+    this.load.image("playerfront", "assets/playerfront.png");
   }
 
   create() {
-    this.keys = this.input.keyboard.addKeys({
-      UP: Phaser.Input.Keyboard.KeyCodes.UP,
-      LEFT: Phaser.Input.Keyboard.KeyCodes.LEFT,
-      DOWN: Phaser.Input.Keyboard.KeyCodes.DOWN,
-      RIGHT: Phaser.Input.Keyboard.KeyCodes.RIGHT,
-    });
+    // Use createCursorKeys() to create cursor keys
+    this.keys = this.input.keyboard.createCursorKeys();
 
-    this.player = new Player(this, 50, 50, "player");
-
-    this.player = new Player(
-      this,
-      this.screenSize.width / 2,
-      this.screenSize.height / 2,
-      "player"
-    );
-
-    this.text.setOrigin(0.5, 0.5); // The x and y position of the text is centered
-    this.text.setColor("#FFFFFF");
-    this.text.setFontSize(30);
-
-    this.player.setDepth(1000);
+    this.player = new Player(this, 50, 50, "playerfront");
   }
 
   update() {
-    this.player.move(
-      this.keys.UP,
-      this.keys.LEFT,
-      this.keys.DOWN,
-      this.keys.RIGHT
-    );
-
-    if (this.keys.SPACE.isDown) {
-      this.add.image(
-        Math.random() * this.screenSize.width,
-        Math.random() * this.screenSize.height,
-        "player"
-      );
-    }
+    this.player.move(this.keys);
   }
 }
+
+const scene = new Game();
+const config = {
+  type: Phaser.AUTO,
+  width: 800,
+  height: 600,
+  scene: [scene],
+};
+
+const game = new Phaser.Game(config);
