@@ -20,4 +20,5 @@ RUN npm run build
 EXPOSE 8080
 
 # Define the command to run your web server
-CMD ["npm", "start"]
+# CMD ["npm", "start"]
+CMD ["sleep", "infinity"]
