@@ -96,6 +96,16 @@ class Puzzlepiece extends Phaser.Physics.Arcade.Sprite {
   }
 }
 
+class Puzzlehole extends Phaser.Physics.Arcade.Sprite {
+  constructor(scene, x, y, sprite) {
+    super(scene, x, y, sprite);
+    scene.add.existing(this);
+    scene.physics.add.existing(this);
+    this.setImmovable(true);
+    this.speed = 0;
+  }
+}
+
 class Game extends Phaser.Scene {
   constructor() {
     super({ key: "game" });
@@ -112,19 +122,28 @@ class Game extends Phaser.Scene {
     this.load.image("medstone", "assets/m-stone.png");
     this.load.image("smolstone", "assets/s-stone.png");
     this.load.image("tombstone", "assets/tomb.png");
+    this.load.image("crosshole", "assets/crosshole.png");
+    this.load.image("smolstonehole", "assets/smolstonehole.png");
+    this.load.image("tombhole", "assets/tombhole.png");
   }
 
   create() {
     this.keys = this.input.keyboard.createCursorKeys();
 
     // Create player
-    this.player = new Player(this, 50, 50, "player");
+    this.player = new Player(this, 50, 350, "player");
 
     // Create Puzzlepieces array
     this.puzzlepieces = [
-      new Puzzlepiece(this, 200, 250, "tombstone"),
-      new Puzzlepiece(this, 250, 300, "smolstone"),
-      new Puzzlepiece(this, 300, 350, "cross"),
+      new Puzzlepiece(this, 375, 250, "tombstone"),
+      new Puzzlepiece(this, 350, 450, "smolstone"),
+      new Puzzlepiece(this, 325, 350, "cross"),
+    ];
+    // Puzzleholes
+    this.puzzlehole = [
+      new Puzzlepiece(this, 775, 250, "tombhole"),
+      new Puzzlepiece(this, 775, 450, "smolstonehole"),
+      new Puzzlepiece(this, 775, 350, "crosshole"),
     ];
 
     // Create invisible boundaries
