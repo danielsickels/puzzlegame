@@ -141,9 +141,9 @@ class Game extends Phaser.Scene {
     ];
     // Puzzleholes
     this.puzzlehole = [
-      new Puzzlepiece(this, 775, 250, "tombhole"),
-      new Puzzlepiece(this, 775, 450, "smolstonehole"),
-      new Puzzlepiece(this, 775, 350, "crosshole"),
+      new Puzzlehole(this, 775, 250, "tombhole"),
+      new Puzzlehole(this, 775, 450, "smolstonehole"),
+      new Puzzlehole(this, 775, 350, "crosshole"),
     ];
 
     // Create invisible boundaries
