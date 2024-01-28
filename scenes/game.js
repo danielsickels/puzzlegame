@@ -122,18 +122,54 @@ class Game extends Phaser.Scene {
 
     // Create Puzzlepieces array
     this.puzzlepieces = [
-      new Puzzlepiece(this, 200, 200, "tombstone"),
+      new Puzzlepiece(this, 200, 250, "tombstone"),
       new Puzzlepiece(this, 250, 300, "smolstone"),
+      new Puzzlepiece(this, 300, 350, "cross"),
     ];
 
     // Create invisible boundaries
     const { width, height } = this.sys.game.canvas;
-    const thickness = 1;
+    const thickness = 0.5;
 
     this.createBoundary(width / 2, -thickness / 2, width, thickness);
     this.createBoundary(width / 2, height + thickness / 2, width, thickness);
     this.createBoundary(-thickness / 2, height / 2, thickness, height);
     this.createBoundary(width + thickness / 2, height / 2, thickness, height);
+
+    // Create background or tiles group
+    this.backgroundGroup = this.physics.add.group();
+
+    const tileWidth = 56; // Adjust as needed
+    const tileHeight = 56; // Adjust as needed
+    const horizontalSpacing = 10; // Adjust as needed
+    const verticalSpacing = 10; // Adjust as needed
+
+    // Calculate the number of tiles needed in both dimensions
+    const numTilesX = Math.ceil(width / (tileWidth + horizontalSpacing));
+    const numTilesY = Math.ceil(height / (tileHeight + verticalSpacing));
+
+    // Add scenery assets to the background in a grid pattern
+    for (let i = 0; i < numTilesX; i++) {
+      for (let j = 0; j < numTilesY; j++) {
+        const tileX = i * (tileWidth + horizontalSpacing) + tileWidth / 2;
+        const tileY = j * (tileHeight + verticalSpacing) + tileHeight / 2;
+
+        // Use random chance to decide if it's a grass or flower tile
+        const isFlower = Phaser.Math.Between(1, 15) === 1; // 1 in 10 chance
+        const tileKey = isFlower ? "flowers" : "grass";
+
+        const tile = this.backgroundGroup.create(tileX, tileY, tileKey);
+
+        // Set the depth of the background tiles
+        if (tile && tile.setDepth) {
+          tile.setDepth(-1);
+        }
+      }
+    }
+
+    // Detect overlaps without solid collisions
+    this.physics.add.overlap(this.player, this.backgroundGroup);
+    this.physics.add.overlap(this.puzzlepieces, this.backgroundGroup);
   }
 
   update() {
@@ -161,7 +197,9 @@ class Game extends Phaser.Scene {
     // Check for overlap with each puzzlepiece separately
     let overlap = false;
     for (const puzzlepiece of this.puzzlepieces) {
-      if (this.physics.world.overlap(this.player, puzzlepiece)) {
+      if (
+        this.physics.world.overlap(this.player, puzzlepiece, null, null, this)
+      ) {
         overlap = true;
         break;
       }
@@ -189,20 +227,21 @@ class Game extends Phaser.Scene {
 
     // Set up collider between player and boundary
     this.physics.add.collider(this.player, boundary);
+    this.physics.add.collider(this.puzzlepieces, boundary);
   }
 }
 
 const scene = new Game();
 const config = {
   type: Phaser.AUTO,
-  width: 800,
-  height: 600,
+  width: 840,
+  height: 700,
   scene: [scene],
   physics: {
     default: "arcade",
     arcade: {
       gravity: { y: 0 }, // No gravity for this example
-      debug: true,
+      debug: false,
     },
   },
 };
