@@ -103,6 +103,18 @@ class Puzzlehole extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.existing(this);
     this.setImmovable(true);
     this.speed = 0;
+
+    this.setDepth(-1);
+  }
+}
+
+class Stationary extends Phaser.Physics.Arcade.Sprite {
+  constructor(scene, x, y, sprite) {
+    super(scene, x, y, sprite);
+    scene.add.existing(this);
+    scene.physics.add.existing(this);
+    this.setImmovable(true);
+    this.speed = 0;
   }
 }
 
@@ -125,6 +137,14 @@ class Game extends Phaser.Scene {
     this.load.image("crosshole", "assets/crosshole.png");
     this.load.image("smolstonehole", "assets/smolstonehole.png");
     this.load.image("tombhole", "assets/tombhole.png");
+    this.load.image("bench", "assets/bench.png");
+    this.load.image("bigrock", "assets/bigrock.png");
+    this.load.image("medrocks", "assets/medrocks.png");
+    this.load.image("medrocks2", "assets/medrocks2.png");
+    this.load.image("prayer", "assets/prayer.png");
+    this.load.image("shortpot", "assets/shortpot.png");
+    this.load.image("well", "assets/well.png");
+    this.load.image("tallpot", "assets/tallpot.png");
   }
 
   create() {
@@ -135,15 +155,29 @@ class Game extends Phaser.Scene {
 
     // Create Puzzlepieces array
     this.puzzlepieces = [
-      new Puzzlepiece(this, 375, 250, "tombstone"),
-      new Puzzlepiece(this, 350, 450, "smolstone"),
-      new Puzzlepiece(this, 325, 350, "cross"),
+      new Puzzlepiece(this, 375, 350, "tombstone"),
+      new Puzzlepiece(this, 350, 250, "smolstone"),
+      new Puzzlepiece(this, 325, 450, "cross"),
     ];
     // Puzzleholes
-    this.puzzlehole = [
+    this.puzzleholes = [
       new Puzzlehole(this, 775, 250, "tombhole"),
       new Puzzlehole(this, 775, 450, "smolstonehole"),
       new Puzzlehole(this, 775, 350, "crosshole"),
+    ];
+    this.stationaries = [
+      new Stationary(this, 775, 75, "well"),
+      new Stationary(this, 700, 100, "medrocks2"),
+      new Stationary(this, 75, 125, "medrocks"),
+      new Stationary(this, 50, 75, "bigrock"),
+      new Stationary(this, 670, 50, "medrocks"),
+      new Stationary(this, 50, 650, "prayer"),
+      new Stationary(this, 375, 650, "bench"),
+      new Stationary(this, 300, 675, "shortpot"),
+      new Stationary(this, 330, 665, "shortpot"),
+      new Stationary(this, 420, 660, "tallpot"),
+      new Stationary(this, 700, 650, "bigrock"),
+      new Stationary(this, 710, 680, "medrocks2"),
     ];
 
     // Create invisible boundaries
@@ -160,8 +194,8 @@ class Game extends Phaser.Scene {
 
     const tileWidth = 56; // Adjust as needed
     const tileHeight = 56; // Adjust as needed
-    const horizontalSpacing = 10; // Adjust as needed
-    const verticalSpacing = 10; // Adjust as needed
+    const horizontalSpacing = 40; // Adjust as needed
+    const verticalSpacing = 40; // Adjust as needed
 
     // Calculate the number of tiles needed in both dimensions
     const numTilesX = Math.ceil(width / (tileWidth + horizontalSpacing));
@@ -181,7 +215,7 @@ class Game extends Phaser.Scene {
 
         // Set the depth of the background tiles
         if (tile && tile.setDepth) {
-          tile.setDepth(-1);
+          tile.setDepth(-2);
         }
       }
     }
@@ -212,12 +246,38 @@ class Game extends Phaser.Scene {
         this
       );
     }
+    for (const puzzlehole of this.puzzleholes) {
+      this.physics.world.collide(
+        this.player,
+        puzzlehole,
+        this.handlePuzzleholeCollision,
+        null,
+        this
+      );
+    }
+    for (const stationary of this.stationaries) {
+      this.physics.world.collide(
+        this.player,
+        stationary,
+        this.handleStationaryCollision,
+        null,
+        this
+      );
+    }
 
     // Check for overlap with each puzzlepiece separately
     let overlap = false;
     for (const puzzlepiece of this.puzzlepieces) {
       if (
         this.physics.world.overlap(this.player, puzzlepiece, null, null, this)
+      ) {
+        overlap = true;
+        break;
+      }
+    }
+    for (const puzzlehole of this.puzzleholes) {
+      if (
+        this.physics.world.overlap(this.player, puzzlehole, null, null, this)
       ) {
         overlap = true;
         break;
@@ -230,10 +290,33 @@ class Game extends Phaser.Scene {
   }
 
   handlePuzzlepieceCollision(player, puzzlepiece) {
+    // Reset player velocity
+    player.body.setVelocity(0, 0);
+
     // Reduce player speed when colliding with the Puzzlepiece
     if (player.body.velocity.x !== 0 || player.body.velocity.y !== 0) {
       player.speed *= 0.5; // Reduce player speed to half
       player.move(this.keys); // Update player velocity based on the new speed
+    }
+  }
+
+  handlePuzzleholeCollision(player, puzzlehole) {
+    // Reset player velocity
+    player.body.setVelocity(0, 0);
+
+    // Reduce player speed when colliding with the Puzzlepiece
+    if (player.body.velocity.x !== 0 || player.body.velocity.y !== 0) {
+      player.speed = 0; // player speed to 0
+    }
+  }
+
+  handlePuzzleholeCollision(player, puzzlehole) {
+    // Reset player velocity
+    player.body.setVelocity(0, 0);
+
+    // Reduce player speed when colliding with the Puzzlepiece
+    if (player.body.velocity.x !== 0 || player.body.velocity.y !== 0) {
+      player.speed = 0; // player speed to 0
     }
   }
 
